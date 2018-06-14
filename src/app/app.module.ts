@@ -1,32 +1,44 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule, Component } from '@angular/core';
+import { NgModule, Component , APP_INITIALIZER} from '@angular/core';
 
 import { AppComponent } from './app.component';
-import { ProductListComponent } from './products/product-list.component';
-import {FormsModule} from '@angular/forms';
-import { ConvertToSpacesPipe } from './shared/convert-to-spaces-pipe';
-import { StarComponent } from './shared/star.component';
-import { ProductDetailComponent } from './products/product-detail.component';
+
 import { WelcomeComponent } from './home/welcome.component';
 import {RouterModule} from '@angular/router';
+
+import { ProductModule } from './products/product.module';
+import { ConfigService } from './shared/config.service';
+
+
+import { environment } from '../environments/environment';
 
 
 @NgModule({
   declarations: [
-    AppComponent,ProductListComponent,ConvertToSpacesPipe,StarComponent, ProductDetailComponent, WelcomeComponent
+    AppComponent, WelcomeComponent
   ],
   imports: [
     BrowserModule,
-    FormsModule,
     RouterModule.forRoot([
-      {path: 'products', component: ProductListComponent},
-      {path: 'product/:id', component: ProductDetailComponent},
+      
       {path: 'welcome', component: WelcomeComponent},
     {path: '', redirectTo: 'welcome', pathMatch: 'full'},
-  {path:'**', redirectTo: 'welcome', pathMatch: 'full'},])
-
+  {path:'**', redirectTo: 'welcome', pathMatch: 'full'},]),
+    ProductModule
   ],
-  providers: [],
+  providers:[
+    ConfigService,
+  {
+    provide: APP_INITIALIZER,
+    useFactory :ConfigLoader,
+    deps:[ConfigService],
+    multi:true
+  }],
+  
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+
+export function ConfigLoader(configService: ConfigService) {
+    return () => configService.load(environment.configFile); 
+  }
